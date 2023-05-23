@@ -1,32 +1,21 @@
-import os
-
-from flask import (Flask, redirect, render_template, request,
-                   send_from_directory, url_for)
+from flask import Flask, request
 
 app = Flask(__name__)
 
-
 @app.route('/')
-def index():
-   print('Request for index page received')
-   return render_template('index.html')
+def home():
+    access_token = request.headers.get('Authorization')
+    user_principal = request.headers.get('X-User-Principal')
 
-@app.route('/favicon.ico')
-def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static'),
-                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
+    if access_token:
+        # Use the access token for further validation or authorization
+        print(f"Access token: {access_token}")
 
-@app.route('/hello', methods=['POST'])
-def hello():
-   name = request.form.get('name')
+    if user_principal:
+        # Use the user principal value in your logic
+        print(f"User principal: {user_principal}")
 
-   if name:
-       print('Request for hello page received with name=%s' % name)
-       return render_template('hello.html', name = name)
-   else:
-       print('Request for hello page received with no name or blank name -- redirecting')
-       return redirect(url_for('index'))
-
+    return "Request received"
 
 if __name__ == '__main__':
-   app.run()
+    app.run(host='0.0.0.0', port=5000)
