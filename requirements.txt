@@ -2,3 +2,4 @@ Flask==2.0.2
 gunicorn
 jupyter-dash
 pandas
+dash
