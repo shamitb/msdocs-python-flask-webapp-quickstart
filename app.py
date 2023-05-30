@@ -1,26 +1,35 @@
-from dash import Dash, html, dcc, callback, Output, Input
-import plotly.express as px
-import pandas as pd
-from flask import Flask, request
+import dash
+from dash.dependencies import Input, Output
+import flask
 
-df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder_unfiltered.csv')
+app = dash.Dash(__name__)
 
-app = Dash(__name__)
-user_principal = request.headers.get('X-Ms-Client-Principal-Name')
+# Define a callback function that retrieves the client principal name
+@app.callback(Output('output', 'children'), [Input('dummy-input', 'value')])
+def get_client_principal_name(dummy_value):
+    # Get the request context from the global Flask object
+    ctx = flask._app_ctx_stack.top
 
-app.layout = html.Div([
-    html.H1(children=user_principal, style={'textAlign':'center'}),
-    dcc.Dropdown(df.country.unique(), 'Canada', id='dropdown-selection'),
-    dcc.Graph(id='graph-content')
+    # Check if the request context exists
+    if ctx is not None:
+        # Access the request headers
+        request = flask.request
+        headers = request.headers
+
+        # Retrieve the client principal name from the headers
+        principal_name = headers.get('X-Ms-Client-Principal-Name')
+
+        if principal_name:
+            return f"Client Principal Name: {principal_name}"
+
+    # Return a default value if the client principal name is not found
+    return "Client Principal Name not found."
+
+# Define the layout of the app
+app.layout = dash.html.Div([
+    dash.dcc.Input(id='dummy-input', style={'display': 'none'}),
+    dash.html.Div(id='output')
 ])
-
-@callback(
-    Output('graph-content', 'figure'),
-    Input('dropdown-selection', 'value')
-)
-def update_graph(value):
-    dff = df[df.country==value]
-    return px.line(dff, x='year', y='pop')
 
 if __name__ == '__main__':
     app.run_server(debug=True)
