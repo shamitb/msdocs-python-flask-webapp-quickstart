@@ -1,5 +1,5 @@
 Flask==2.0.2
-jupyter-dash
+gunicorn
 pandas
 dash==0.36.0
 dash-html-components==0.13.5
