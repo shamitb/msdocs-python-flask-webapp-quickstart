@@ -1,30 +1,32 @@
-import dash
-import dash_core_components as dcc
-import dash_html_components as html
+import os
 
-dash_app = dash.Dash()
-app = dash_app.server
+from flask import (Flask, redirect, render_template, request,
+                   send_from_directory, url_for)
 
-dash_app.layout = html.Div(children=[
-    html.H1(children='Hello Dash'),
+app = Flask(__name__)
 
-    html.Div(children='''
-        This is Dash running on Azure App Service without a Docker container.
-    '''),
 
-    dcc.Graph(
-        id='example-graph',
-        figure={
-            'data': [
-                {'x': [1, 2, 3], 'y': [4, 1, 2], 'type': 'bar', 'name': 'SF'},
-                {'x': [1, 2, 3], 'y': [2, 4, 5], 'type': 'bar', 'name': u'Montréal'},
-            ],
-            'layout': {
-                'title': 'Dash Data Visualization'
-            }
-        }
-    )
-])
+@app.route('/')
+def index():
+   print('Request for index page received')
+   return render_template('index.html')
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+@app.route('/hello', methods=['POST'])
+def hello():
+   name = request.form.get('name')
+
+   if name:
+       print('Request for hello page received with name=%s' % name)
+       return render_template('hello.html', name = name)
+   else:
+       print('Request for hello page received with no name or blank name -- redirecting')
+       return redirect(url_for('index'))
+
 
 if __name__ == '__main__':
-    dash_app.run_server(debug=True)
+   app.run()
